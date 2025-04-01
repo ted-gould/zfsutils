@@ -14,7 +14,7 @@ description: |
 
 base: core24
 confinement: strict
-grade: stable  # Use 'stable' for production
+grade: stable
 
 parts:
   zfsutils:
