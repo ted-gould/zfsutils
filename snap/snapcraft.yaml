@@ -1,0 +1,113 @@
+name: zfsutils
+adopt-info: zfsutils
+summary: ZFS Userspace Utilities for Ubuntu Core
+description: |
+  Userspace utilities for ZFS filesystem management on Ubuntu Core systems.
+  Includes commands for importing, mounting, and managing ZFS pools and filesystems.
+
+base: core24
+confinement: strict
+grade: devel  # Use 'stable' for production
+
+parts:
+  zfsutils:
+    plugin: nil
+    stage-packages:
+      - zfsutils-linux
+      - libzfs4linux
+      - libnvpair3linux
+      - libuutil3linux
+      - bash-completion
+    override-build: |
+      snapcraftctl build
+      # Extract version from the control file of the staged package
+      if [ -f $SNAPCRAFT_PART_INSTALL/usr/share/doc/zfsutils-linux/changelog.Debian.gz ]; then
+        ZFS_VERSION=$(zcat $SNAPCRAFT_PART_INSTALL/usr/share/doc/zfsutils-linux/changelog.Debian.gz | head -1 | sed 's/.*(\(.*\)).*/\1/')
+        snapcraftctl set-version "$ZFS_VERSION"
+      elif [ -d $SNAPCRAFT_STAGE/usr/share/doc/zfsutils-linux ]; then
+        ZFS_VERSION=$(cat $SNAPCRAFT_STAGE/usr/share/doc/zfsutils-linux/copyright | grep -i "version" | head -1 | sed 's/.*[vV]ersion \(.*\)/\1/' | tr -d ' ')
+        if [ -n "$ZFS_VERSION" ]; then
+          snapcraftctl set-version "$ZFS_VERSION"
+        else
+          # Fallback if version can't be found
+          snapcraftctl set-version "0.$(date +%Y%m%d)"
+        fi
+      else
+        # Fallback if we can't find the version
+        snapcraftctl set-version "0.$(date +%Y%m%d)"
+      fi
+      # Make directories for ZFS cache and configuration
+      mkdir -p $SNAPCRAFT_PART_INSTALL/etc/zfs
+      mkdir -p $SNAPCRAFT_PART_INSTALL/var/lib/zfs
+
+plugs:
+  system-files:
+    interface: system-files
+    read:
+      - /dev
+      - /proc
+      - /sys
+      - /run
+      - /etc/zfs
+      - /etc/hostid
+    write:
+      - /dev/zfs
+      - /etc/zfs
+      - /var/lib/zfs
+      - /run/lock
+  block-devices:
+    interface: block-devices
+    allow-sandbox: false
+
+apps:
+  zpool:
+    command: sbin/zpool
+    aliases: [zpool]
+    plugs:
+      - hardware-observe
+      - mount-observe
+      - system-files
+      - block-devices
+      - kernel-module-control
+      - hardware-random-observe
+      - log-observe
+      - home
+      - system-observe
+    environment:
+      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/lib/$SNAPCRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH
+      PATH: $SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH
+  
+  zfs:
+    command: sbin/zfs
+    completer: usr/share/bash-completion/completions/zfs
+    aliases: [zfs]
+    plugs:
+      - hardware-observe
+      - mount-observe
+      - system-files
+      - block-devices
+      - kernel-module-control
+      - hardware-random-observe
+      - log-observe
+      - home
+      - system-observe
+    environment:
+      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/lib/$SNAPCRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH
+      PATH: $SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH
+      
+  mount-zfs:
+    command: sbin/mount.zfs
+    aliases: [mount.zfs]
+    plugs:
+      - hardware-observe
+      - mount-observe
+      - system-files
+      - block-devices
+      - kernel-module-control
+      - hardware-random-observe
+      - log-observe
+      - home
+      - system-observe
+    environment:
+      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/lib/$SNAPCRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH
+      PATH: $SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH
