@@ -4,6 +4,13 @@ summary: ZFS Userspace Utilities for Ubuntu Core
 description: |
   Userspace utilities for ZFS filesystem management on Ubuntu Core systems.
   Includes commands for importing, mounting, and managing ZFS pools and filesystems.
+  Built from the Ubuntu zfsutils package in Ubuntu 24.04.
+  .
+  This package provides the standard tools, which work well, except for when
+  mounting filesystems. When mounting filesystems they will get mounted in the
+  zfsutils namespace if you use the confined version of the tools. Luckily you
+  can use them in an "unconfined" manner. If you add `/snap/zfsutils/current` to
+  the path of your root user. You can then call the tools unconfined.
 
 base: core24
 confinement: strict
