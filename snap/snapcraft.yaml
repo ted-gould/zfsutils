@@ -39,6 +39,10 @@ parts:
       # Make directories for ZFS cache and configuration
       mkdir -p $SNAPCRAFT_PART_INSTALL/etc/zfs
       mkdir -p $SNAPCRAFT_PART_INSTALL/var/lib/zfs
+  helpers:
+    plugin: dump
+    source: snap/local/scripts
+
 
 plugs:
   system-files:
@@ -61,7 +65,7 @@ plugs:
 
 apps:
   zpool:
-    command: sbin/zpool
+    command: zpool
     aliases: [zpool]
     plugs:
       - hardware-observe
@@ -73,12 +77,9 @@ apps:
       - log-observe
       - home
       - system-observe
-    environment:
-      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/lib/$SNAPCRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH
-      PATH: $SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH
   
   zfs:
-    command: sbin/zfs
+    command: zfs
     completer: usr/share/bash-completion/completions/zfs
     aliases: [zfs]
     plugs:
@@ -91,12 +92,9 @@ apps:
       - log-observe
       - home
       - system-observe
-    environment:
-      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/lib/$SNAPCRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH
-      PATH: $SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH
       
   mount-zfs:
-    command: sbin/mount.zfs
+    command: mount.zfs
     aliases: [mount.zfs]
     plugs:
       - hardware-observe
@@ -108,6 +106,3 @@ apps:
       - log-observe
       - home
       - system-observe
-    environment:
-      LD_LIBRARY_PATH: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET:$SNAP/lib/$SNAPCRAFT_ARCH_TRIPLET:$LD_LIBRARY_PATH
-      PATH: $SNAP/usr/sbin:$SNAP/usr/bin:$SNAP/sbin:$SNAP/bin:$PATH
